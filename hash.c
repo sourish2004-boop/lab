@@ -201,3 +201,192 @@ int main(void)
 
     return 0;
 }
+
+
+bfs
+#include <stdio.h>
+#include <stdlib.h>
+
+/* Breadth First Search on an undirected graph (adjacency matrix) */
+
+#define MAX 20
+
+void bfs(int adj[MAX][MAX], int n, int start) {
+    int visited[MAX] = {0};
+    int queue[MAX], front = 0, rear = 0, i, u;
+
+    visited[start] = 1;
+    queue[rear++] = start;
+    printf("BFS order: ");
+    while (front < rear) {
+        u = queue[front++];
+        printf("%d ", u);
+        for (i = 0; i < n; i++) {
+            if (adj[u][i] == 1 && !visited[i]) {
+                visited[i] = 1;
+                queue[rear++] = i;
+            }
+        }
+    }
+    printf("\n");
+}
+
+int main() {
+    int adj[MAX][MAX] = {0};
+    int n, e, u, v, start, i;
+
+    printf("Number of vertices (0 to %d): ", MAX - 1);
+    scanf("%d", &n);
+    printf("Number of edges: ");
+    scanf("%d", &e);
+    printf("Enter each edge as 'u v' (undirected):\n");
+    for (i = 0; i < e; i++) {
+        scanf("%d %d", &u, &v);
+        adj[u][v] = adj[v][u] = 1;
+    }
+    printf("Start vertex: ");
+    scanf("%d", &start);
+    bfs(adj, n, start);
+    return 0;
+}
+
+bst
+#include <stdio.h>
+#include <stdlib.h>
+
+/* Binary Search Tree: Create, Insert, Traversals, Delete, Search */
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node *newNode(int val) {
+    struct Node *n = (struct Node *)malloc(sizeof(struct Node));
+    n->data = val;
+    n->left = n->right = NULL;
+    return n;
+}
+
+/* b) Insertion (duplicates are ignored) */
+struct Node *insert(struct Node *root, int val) {
+    if (root == NULL) return newNode(val);
+    if (val < root->data)
+        root->left = insert(root->left, val);
+    else if (val > root->data)
+        root->right = insert(root->right, val);
+    else
+        printf("%d already exists, skipped.\n", val);
+    return root;
+}
+
+/* a) Create: build a BST from n values typed by the user */
+struct Node *create() {
+    struct Node *root = NULL;
+    int n, val, i;
+    printf("How many nodes? ");
+    scanf("%d", &n);
+    printf("Enter %d values: ", n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", &val);
+        root = insert(root, val);
+    }
+    return root;
+}
+
+/* c) Traversals */
+void inorder(struct Node *root) {
+    if (root == NULL) return;
+    inorder(root->left);
+    printf("%d ", root->data);
+    inorder(root->right);
+}
+
+void preorder(struct Node *root) {
+    if (root == NULL) return;
+    printf("%d ", root->data);
+    preorder(root->left);
+    preorder(root->right);
+}
+
+void postorder(struct Node *root) {
+    if (root == NULL) return;
+    postorder(root->left);
+    postorder(root->right);
+    printf("%d ", root->data);
+}
+
+/* smallest node in a subtree (used by deletion) */
+struct Node *minNode(struct Node *root) {
+    while (root->left != NULL) root = root->left;
+    return root;
+}
+
+/* d) Deletion */
+struct Node *deleteNode(struct Node *root, int key) {
+    if (root == NULL) {
+        printf("%d not found.\n", key);
+        return NULL;
+    }
+    if (key < root->data)
+        root->left = deleteNode(root->left, key);
+    else if (key > root->data)
+        root->right = deleteNode(root->right, key);
+    else {
+        /* Case 1 & 2: zero or one child */
+        if (root->left == NULL) {
+            struct Node *tmp = root->right;
+            free(root);
+            return tmp;
+        }
+        if (root->right == NULL) {
+            struct Node *tmp = root->left;
+            free(root);
+            return tmp;
+        }
+        /* Case 3: two children -> use inorder successor */
+        struct Node *succ = minNode(root->right);
+        root->data = succ->data;
+        root->right = deleteNode(root->right, succ->data);
+    }
+    return root;
+}
+
+/* e) Searching */
+struct Node *search(struct Node *root, int key) {
+    if (root == NULL || root->data == key) return root;
+    if (key < root->data) return search(root->left, key);
+    return search(root->right, key);
+}
+
+int main() {
+    struct Node *root = NULL;
+    int ch, val;
+    do {
+        printf("\n--- BST MENU ---\n");
+        printf("1. Create\n2. Insert\n3. Inorder\n4. Preorder\n5. Postorder\n");
+        printf("6. Delete\n7. Search\n0. Back\n");
+        printf("Choice: ");
+        scanf("%d", &ch);
+        switch (ch) {
+        case 1: root = create(); break;
+        case 2:
+            printf("Value: "); scanf("%d", &val);
+            root = insert(root, val);
+            break;
+        case 3: printf("Inorder: ");   inorder(root);   printf("\n"); break;
+        case 4: printf("Preorder: ");  preorder(root);  printf("\n"); break;
+        case 5: printf("Postorder: "); postorder(root); printf("\n"); break;
+        case 6:
+            printf("Value to delete: "); scanf("%d", &val);
+            root = deleteNode(root, val);
+            break;
+        case 7:
+            printf("Value to search: "); scanf("%d", &val);
+            if (search(root, val)) printf("%d FOUND.\n", val);
+            else printf("%d NOT found.\n", val);
+            break;
+        }
+    } while (ch != 0);
+    return 0;
+}
